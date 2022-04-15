@@ -24,12 +24,20 @@ import retrofit2.http.*
     suspend fun allStories(
         @Query("page") page: Int,
         @Query("size") size: Int = 10,
+        @Query("location") location: Int = 1,
     ): StoriesResponse
+
+    @GET("/v1/stories")
+    fun  allStories(
+        @Query("location") location: Int = 1,
+    ): Call<StoriesResponse>
 
     @Multipart
     @POST("/v1/stories")
     fun postStory(
         @Part("description") description: RequestBody,
+        @Part("lat") lat: RequestBody,
+        @Part("lon") lon: RequestBody,
         @Part photo: MultipartBody.Part):
             Call<PostStoryResponse>
 

@@ -21,7 +21,7 @@
         app:layout_constraintTop_toBottomOf="@+id/toolbar"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintBottom_toTopOf="@+id/clOptions"
         android:background="@color/rvBg"
         android:layout_height="0dp">
         <androidx.recyclerview.widget.RecyclerView
@@ -47,14 +47,41 @@
         app:layout_constraintTop_toTopOf="parent"
         android:layout_height="wrap_content"/>
 
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/fbNewBook"
-        android:layout_width="wrap_content"
-        app:layout_constraintBottom_toBottomOf="parent"
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/clOptions"
+        android:layout_width="match_parent"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        android:layout_margin="50dp"
-        app:tint="@color/white"
-        android:src="@drawable/ic_baseline_add_24"
-        android:layout_height="wrap_content"/>
+        android:background="@color/white"
+        android:padding="20dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:layout_height="wrap_content">
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/btnAdd"
+            android:layout_width="0dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/btnViewOnMap"
+            app:layout_constraintTop_toTopOf="parent"
+            android:text="Add Story"
+            android:textColor="@color/white"
+            android:background="@color/teal_700"
+            android:layout_marginEnd="10dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            android:layout_height="50dp"/>
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/btnViewOnMap"
+            android:layout_width="0dp"
+            app:layout_constraintStart_toEndOf="@+id/btnAdd"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:text="View On Map"
+            android:layout_marginStart="10dp"
+            android:textColor="@color/white"
+            android:background="@color/purple_700"
+            app:layout_constraintBottom_toBottomOf="parent"
+            android:layout_height="50dp"/>
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

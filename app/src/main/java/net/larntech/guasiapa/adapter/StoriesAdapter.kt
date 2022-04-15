@@ -34,7 +34,6 @@ class StoriesAdapter(val clicklistener: clickedListener)
         }
     }
 
-
      interface clickedListener {
         fun Clicked(story: StoriesResponse.ListStoryBean)
     }

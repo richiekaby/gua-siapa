@@ -2,12 +2,16 @@ package net.larntech.guasiapa
 
 import android.Manifest
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.location.Location
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.provider.MediaStore
+import android.support.annotation.NonNull
 import android.util.Log
 import android.widget.Button
 import android.widget.EditText
@@ -15,6 +19,9 @@ import android.widget.ImageView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
+import androidx.core.app.ActivityCompat
+import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationServices
 import com.karumi.dexter.Dexter
 import com.karumi.dexter.MultiplePermissionsReport
 import com.karumi.dexter.PermissionToken
@@ -39,11 +46,12 @@ class AddStoryActivity : AppCompatActivity() {
     private lateinit var openGallery: Button
     private lateinit var edDesc: EditText
     private lateinit var btnUpload: Button
-
+    private var fusedLocationClient: FusedLocationProviderClient? = null
     val REQUESTS_IMAGE_CAPTURE = 1
     val REQUEST_IMAGE_GALLERY = 2
     var imageBitmap: Bitmap? = null
     var imageUri: Uri? = null
+    private lateinit var location: Location;
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -59,7 +67,7 @@ class AddStoryActivity : AppCompatActivity() {
         edDesc = findViewById(R.id.edDesc)
         btnUpload = findViewById(R.id.btnUpload)
 
-
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
         setToolBar()
         clickListener()
     }
@@ -109,7 +117,7 @@ class AddStoryActivity : AppCompatActivity() {
         }
 
         btnUpload.setOnClickListener {
-            saveData()
+            showPermissionAlert();
         }
 
     }
@@ -166,12 +174,14 @@ class AddStoryActivity : AppCompatActivity() {
     }
 
 
+
+
     private fun saveData(){
-        if(edDesc.text.isNotEmpty() && imageBitmap != null){
+        if(edDesc.text.isNotEmpty() && imageBitmap != null && ::location.isInitialized){
             val file = bitmapToFile(imageBitmap!!,"image.png")!!
             val reqFile: RequestBody = RequestBody.create("image/*".toMediaTypeOrNull(), file)
             val body: MultipartBody.Part = MultipartBody.Part.createFormData("photo",file.name, reqFile)
-            save( edDesc.text.toString(),body)
+            save( edDesc.text.toString(),body,location.latitude.toString(),location.longitude.toString())
         }else{
             showMessage("All info required ")
         }
@@ -213,13 +223,26 @@ class AddStoryActivity : AppCompatActivity() {
         Toast.makeText(this,message, Toast.LENGTH_SHORT).show()
     }
 
-    private fun save(description: String,photo: MultipartBody.Part){
+
+
+    private fun save(description: String,photo: MultipartBody.Part, lat: String, lon: String){
+
+
         showMessage(" Saving story ...")
         val requestBody: RequestBody = RequestBody.create(
             "text/plain".toMediaTypeOrNull(),
             description
         )
-        val apiCall = ApiClient.getApiService().postStory(requestBody,photo);
+
+        val myLat: RequestBody = RequestBody.create(
+            "text/plain".toMediaTypeOrNull(),
+            lat
+        )
+        val myLon: RequestBody = RequestBody.create(
+            "text/plain".toMediaTypeOrNull(),
+            lon
+        )
+        val apiCall = ApiClient.getApiService().postStory(requestBody,myLat,myLon,photo);
         apiCall.enqueue(object : Callback<PostStoryResponse> {
             override fun onResponse(call: Call<PostStoryResponse>, response: Response<PostStoryResponse>) {
                 if(response.isSuccessful){
@@ -256,4 +279,51 @@ class AddStoryActivity : AppCompatActivity() {
         return Uri.parse(path)
     }
 
+    private fun fetchLastLocation() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            if (checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && checkSelfPermission(
+                    Manifest.permission.ACCESS_COARSE_LOCATION
+                ) != PackageManager.PERMISSION_GRANTED
+            ) {
+                showPermissionAlert()
+                return
+            }
+        }
+        fusedLocationClient!!.lastLocation
+            .addOnSuccessListener(
+                this
+            ) { locatio ->
+                // Got last known location. In some rare situations this can be null.
+                if (locatio != null) {
+                    location = locatio
+                    // Logic to handle location object
+                    Log.e("LAST LOCATION: ", location.toString())
+                    saveData()
+
+                }
+            }
+    }
+
+    private fun showPermissionAlert() {
+        Dexter.withContext(this)
+            .withPermissions(
+                Manifest.permission.ACCESS_COARSE_LOCATION,
+                Manifest.permission.ACCESS_FINE_LOCATION,
+            ).withListener(object : MultiplePermissionsListener {
+                override fun onPermissionsChecked(report: MultiplePermissionsReport) { /* ... */
+                    if(report.areAllPermissionsGranted()){
+                        fetchLastLocation()
+                    }
+
+                }
+
+                override fun onPermissionRationaleShouldBeShown(
+                    permissions: List<PermissionRequest?>?,
+                    token: PermissionToken?
+                ) { /* ... */
+                }
+            }).check()
+
+
+    }
 }

@@ -5,7 +5,7 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
-import android.view.View
+import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
@@ -14,17 +14,13 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.google.android.material.floatingactionbutton.FloatingActionButton
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
-import net.larntech.guasiapa.AddStoryActivity
-import net.larntech.guasiapa.LoginActivity
-import net.larntech.guasiapa.R
-import net.larntech.guasiapa.StoryDetailsActivity
+import net.larntech.guasiapa.*
 import net.larntech.guasiapa.adapter.StoriesAdapter
+import net.larntech.guasiapa.maps.MapsActivity
 import net.larntech.guasiapa.model.stories.StoriesResponse
 import net.larntech.guasiapa.network.ApiClient
-import net.larntech.guasiapa.network.ApiService
 import net.larntech.guasiapa.share_pref.SharePref
 
 
@@ -33,9 +29,9 @@ class StoriesActivity : AppCompatActivity(), StoriesAdapter.clickedListener {
     private lateinit var tlBar: Toolbar;
     private lateinit var recyclerView: RecyclerView
     private lateinit var tvNoData: TextView
-    private lateinit var fbNewBook: FloatingActionButton
+    private lateinit var btnAdd: Button
+    private lateinit var btnViewMaps: Button
     private lateinit var storyAdapter: StoriesAdapter
-    private lateinit var storiesResponseList: MutableList<StoriesResponse.ListStoryBean>;
     lateinit var storyViewModel: StoryViewModel
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -47,12 +43,12 @@ class StoriesActivity : AppCompatActivity(), StoriesAdapter.clickedListener {
         tlBar = findViewById(R.id.toolbar)
         tvNoData = findViewById(R.id.tvNoData)
         recyclerView = findViewById(R.id.recyclerview)
-        fbNewBook = findViewById(R.id.fbNewBook)
+        btnAdd = findViewById(R.id.btnAdd)
+        btnViewMaps = findViewById(R.id.btnViewOnMap)
         storyAdapter = StoriesAdapter(this);
         recyclerView.layoutManager = LinearLayoutManager(this)
         recyclerView.adapter = storyAdapter
         recyclerView.setHasFixedSize(true)
-        storiesResponseList = arrayListOf()
         setToolBar();
         setupViewModel()
         fetchAllStories()
@@ -117,8 +113,12 @@ class StoriesActivity : AppCompatActivity(), StoriesAdapter.clickedListener {
 
 
     private fun clickListener(){
-        fbNewBook.setOnClickListener {
+        btnAdd.setOnClickListener {
             startActivity(Intent(this, AddStoryActivity::class.java))
+        }
+
+        btnViewMaps.setOnClickListener {
+            startActivity(Intent(this, MapsActivity::class.java))
         }
     }
 
