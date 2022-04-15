@@ -70,7 +70,6 @@ class StoriesActivity : AppCompatActivity(), StoriesAdapter.clickedListener {
         this.supportActionBar!!.title = "Stories"
     }
 
-
     private fun fetchAllStories(){
         showMessage("Loading stories ...")
         lifecycleScope.launch {
