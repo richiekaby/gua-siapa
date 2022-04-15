@@ -72,7 +72,7 @@ class StoriesActivity : AppCompatActivity(), StoriesAdapter.clickedListener {
 
 
     private fun fetchAllStories(){
-
+        showMessage("Loading stories ...")
         lifecycleScope.launch {
             storyViewModel.getStories().collectLatest { pagedData ->
                 storyAdapter.submitData(pagedData)
